@@ -7,11 +7,13 @@ const registerUser = async (req, res) => {
     const userExists = await User.findOne({ email });
     if (userExists) return res.status(400).json({ message: 'El usuario ya existe' });
 
+    const roles = role === 'conductor' ? ['conductor', 'pasajero'] : [role];
+
     const newUser = new User({
       nombre,
       email,
       password,
-      role,
+      roles,
       licencia: role === 'conductor' ? licencia : null,
       vehiculo: role === 'conductor' ? vehiculo : null
     });
@@ -24,12 +26,18 @@ const registerUser = async (req, res) => {
   }
 };
 
+
 const loginUser = async (req, res) => {
   const { email, password, role } = req.body;
 
   try {
     const user = await User.findOne({ email });
-    if (!user || user.password !== password || user.role !== role) {
+
+    if (
+      !user ||
+      user.password !== password ||
+      !user.roles.includes(role) // <- esto verifica si el rol solicitado está dentro del array
+    ) {
       return res.status(401).json({ message: 'Credenciales inválidas o rol incorrecto' });
     }
 

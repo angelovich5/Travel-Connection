@@ -4,7 +4,7 @@ const userSchema = new mongoose.Schema({
   nombre: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  role: { type: String, required: true },
+  roles: { type: [String], required: true }, // ← Ahora es un array de roles
   licencia: { type: String },
   vehiculo: { type: String }
 });
