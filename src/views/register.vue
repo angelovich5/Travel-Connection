@@ -28,6 +28,8 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   name: 'Register',
   data() {
@@ -48,26 +50,32 @@ export default {
     }
   },
   methods: {
-    registrar() {
-      // Tu lógica de registro
-      console.log('Registrando como', this.role);
-      console.log('Nombre:', this.nombre);
-      console.log('Correo:', this.email);
-      console.log('Contraseña:', this.password);
-      if (this.role === 'conductor') {
-        console.log('Licencia:', this.licencia);
-        console.log('Vehículo:', this.vehiculo);
+  async registrar() {
+    try {
+      const data = {
+        nombre: this.nombre,
+        email: this.email,
+        password: this.password,
+        role: this.role,
+        licencia: this.role === 'conductor' ? this.licencia : null,
+        vehiculo: this.role === 'conductor' ? this.vehiculo : null
+      };
+
+      const response = await axios.post('http://localhost:5000/api/users/register', data);
+
+      // Si todo sale bien, redirige
+      if (response.status === 201) {
+        this.$router.push(`/login/${this.role}`);
+      } else {
+        alert(response.data.message || 'Registro fallido');
       }
-    },
-    goToLogin() {
-      this.$router.push({ path: `/login/${this.role}` });
+    } catch (error) {
+      console.error('❌ Error al registrar:', error.response?.data?.message || error.message);
+      alert(error.response?.data?.message || 'Error al registrar usuario');
     }
   },
-  watch: {
-  '$route.params.role'(newRole) {
-    // Aquí puedes actualizar datos o forzar recarga si es necesario
-    console.log('Role cambió a:', newRole);
-    // Por ejemplo, resetear campos o lógica necesaria
+  goToLogin() {
+    this.$router.push({ path: `/login/${this.role}` });
   }
 }
 

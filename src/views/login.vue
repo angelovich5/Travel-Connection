@@ -22,6 +22,8 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   name: 'Login',
   data() {
@@ -40,26 +42,31 @@ export default {
     }
   },
   methods: {
-    login() {
-      // Tu lógica de login
-      console.log('Rol:', this.role);
-      console.log('Correo:', this.email);
-      console.log('Contraseña:', this.password);
-      if (this.role === 'conductor') {
-        console.log('Licencia:', this.licencia);
-      }
-    },
+    async login() {
+      try {
+        const payload = {
+          email: this.email,
+          password: this.password,
+          role: this.role
+        };
+
+        const res = await axios.post('http://localhost:5000/api/users/login', payload);
+        alert('Login exitoso');
+
+        if (this.role === 'conductor') {
+          this.$router.push('/homeConductor');
+        } else {
+          this.$router.push('/homePasajero');
+        }
+    } catch (error) {
+        console.error('Error en login:', error.response?.data?.message || error.message);
+        alert(error.response?.data?.message || 'Error al iniciar sesión');
+    }
+  },
     goToRegister() {
       this.$router.push({ path: `/register/${this.role}` });
     }
-  },
-  watch: {
-  '$route.params.role'(newRole) {
-    // Aquí puedes actualizar datos o forzar recarga si es necesario
-    console.log('Role cambió a:', newRole);
-    // Por ejemplo, resetear campos o lógica necesaria
-  }
 }
-
 };
 </script>
+
